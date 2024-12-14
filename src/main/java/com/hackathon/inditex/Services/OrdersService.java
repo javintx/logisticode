@@ -25,7 +25,7 @@ public class OrdersService {
 
   private void verifySize(String size) {
     if (Stream.of("B", "M", "S").noneMatch(s -> s.equals(size))) {
-      throw new UnknownOrderSizeException(size);
+      throw new UnknownOrderSizeException();
     }
   }
 
@@ -35,8 +35,8 @@ public class OrdersService {
 
   public static class UnknownOrderSizeException extends RuntimeException {
 
-    public UnknownOrderSizeException(String unknownSize) {
-      super("Unknown order size: %s".formatted(unknownSize));
+    public UnknownOrderSizeException() {
+      super("Unknown order size.");
     }
   }
 }
