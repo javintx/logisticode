@@ -17,16 +17,23 @@ public class CentersService {
     this.centersRepository = centersRepository;
   }
 
-  private static void verifyLoadVsCapacityOf(Center center) {
-    if (center.getCurrentLoad() > center.getMaxCapacity()) {
+  private static void verifyCurrentLoadVsMaxCapacityOf(Integer currentLoad, Integer maxCapacity) {
+    if (currentLoad > maxCapacity) {
       throw new LoadCapacityExceededException();
     }
   }
 
   public void createNewLogisticsCenter(Center center) {
-    verifyLoadVsCapacityOf(center);
+    verifyCapacity(center.getCapacity());
+    verifyCurrentLoadVsMaxCapacityOf(center.getCurrentLoad(), center.getMaxCapacity());
     verifyExistingCoordinatesOf(center);
     centersRepository.save(center);
+  }
+
+  private void verifyCapacity(String capacity) {
+    if (!capacity.matches("^(?!.*(.).*\1)[BMS]{1,3}$")) {
+      throw new UnknownCapacitySizeException();
+    }
   }
 
   private void verifyExistingCoordinatesOf(Center center) {
@@ -40,11 +47,37 @@ public class CentersService {
   }
 
   public void updateDetailsOfAnExistingLogisticsCenter(Long id, Center center) {
-    verifyExistenceOfCenterBy(id);
-    verifyLoadVsCapacityOf(center);
-    verifyMoreThanOneExistingCoordinatesFor(id, center.getCoordinates());
-    center.setId(id);
-    centersRepository.save(center);
+    var savedCenter = centersRepository.findById(id).orElseThrow(CenterNotFoundException::new);
+
+    if (center.getName() != null) {
+      savedCenter.setName(center.getName());
+    }
+
+    if (center.getCapacity() != null) {
+      verifyCapacity(center.getCapacity());
+      savedCenter.setCapacity(center.getCapacity());
+    }
+
+    if (center.getStatus() != null) {
+      savedCenter.setStatus(center.getStatus());
+    }
+
+    if (center.getCurrentLoad() != null) {
+      verifyCurrentLoadVsMaxCapacityOf(center.getCurrentLoad(), savedCenter.getMaxCapacity());
+      savedCenter.setCurrentLoad(center.getCurrentLoad());
+    }
+
+    if (center.getMaxCapacity() != null) {
+      verifyCurrentLoadVsMaxCapacityOf(savedCenter.getCurrentLoad(), center.getMaxCapacity());
+      savedCenter.setMaxCapacity(center.getMaxCapacity());
+    }
+
+    if (center.getCoordinates() != null) {
+      verifyMoreThanOneExistingCoordinatesFor(id, center.getCoordinates());
+      savedCenter.setCoordinates(center.getCoordinates());
+    }
+
+    centersRepository.save(savedCenter);
   }
 
   private void verifyMoreThanOneExistingCoordinatesFor(Long id, Coordinates coordinates) {
@@ -84,6 +117,13 @@ public class CentersService {
 
     public CenterNotFoundException() {
       super("Center not found.");
+    }
+  }
+
+  public static class UnknownCapacitySizeException extends RuntimeException {
+
+    public UnknownCapacitySizeException() {
+      super("Unknown capacity size.");
     }
   }
 

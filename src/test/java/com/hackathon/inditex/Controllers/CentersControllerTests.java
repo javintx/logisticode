@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackathon.inditex.Controllers.CentersController.CenterCreationRequest;
+import com.hackathon.inditex.Controllers.CentersController.CenterUpdateRequest;
 import com.hackathon.inditex.Entities.Center;
+import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Services.CentersService;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +38,25 @@ public class CentersControllerTests {
   @Test
   public void createNewLogisticsCenter_ReturnsCreated() throws Exception {
     Center center = new Center();
+    center.setName("Center A");
+    center.setCapacity("MS");
+    center.setStatus("AVAILABLE");
+    center.setMaxCapacity(5);
+    center.setCurrentLoad(4);
+    center.setCoordinates(new Coordinates(10.0, 10.0));
     Mockito.doNothing().when(centersService).createNewLogisticsCenter(Mockito.any(Center.class));
+
+    var centerRequest = new CenterCreationRequest();
+    centerRequest.setName("Center A");
+    centerRequest.setCapacity("MS");
+    centerRequest.setStatus("AVAILABLE");
+    centerRequest.setCurrentLoad(4);
+    centerRequest.setMaxCapacity(5);
+    centerRequest.setCoordinates(new Coordinates(10.0, 10.0));
 
     mockMvc.perform(post("/api/centers")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(center)))
+            .content(objectMapper.writeValueAsString(centerRequest)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.message").value("Logistics center created successfully."));
   }
@@ -59,13 +76,17 @@ public class CentersControllerTests {
   @Test
   public void updateDetailsOfAnExistingLogisticsCenter_ReturnsOk() throws Exception {
     Long id = 1L;
-    Center center = new Center();
+    var center = new Center();
+    center.setStatus("AVAILABLE");
     Mockito.doNothing().when(centersService)
         .updateDetailsOfAnExistingLogisticsCenter(Mockito.eq(id), Mockito.any(Center.class));
 
+    var centerUpdateRequest = new CenterUpdateRequest();
+    centerUpdateRequest.setStatus("AVAILABLE");
+
     mockMvc.perform(patch("/api/centers/{id}", id)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(center)))
+            .content(objectMapper.writeValueAsString(centerUpdateRequest)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Logistics center updated successfully."));
   }

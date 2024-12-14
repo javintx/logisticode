@@ -1,6 +1,6 @@
 package com.hackathon.inditex.Controllers;
 
-import com.hackathon.inditex.Controllers.OrdersController.OrderRequest.BadOrderException;
+import com.hackathon.inditex.Controllers.OrdersController.BadOrderException;
 import com.hackathon.inditex.Services.OrdersService.UnknownOrderSizeException;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
