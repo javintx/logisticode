@@ -4,9 +4,6 @@ import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Services.OrdersService;
 import java.util.List;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,14 +53,11 @@ public class OrdersController {
     }
   }
 
-  @Setter
-  @Getter
-  @NoArgsConstructor
-  public static final class OrderRequest {
-
-    private Long customerId;
-    private String size;
-    private Coordinates coordinates;
+  public record OrderRequest(
+      Long customerId,
+      String size,
+      Coordinates coordinates
+  ) {
 
     void verify() {
       if (customerId == null
@@ -82,12 +76,11 @@ public class OrdersController {
       return order;
     }
 
-  }
+    public static class BadOrderException extends RuntimeException {
 
-  public static class BadOrderException extends RuntimeException {
-
-    public BadOrderException() {
-      super("Bad Order.");
+      public BadOrderException() {
+        super("Bad Order.");
+      }
     }
   }
 }
