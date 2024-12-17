@@ -24,9 +24,8 @@ public class OrdersController {
   }
 
   @PostMapping
-  public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
-    orderRequest.verify();
-    Order savedOrder = ordersService.create(orderRequest.toOrder());
+  public ResponseEntity<?> createOrder(@RequestBody Order order) {
+    Order savedOrder = ordersService.create(order);
     return ResponseEntity.status(201)
         .body(new OrderCreated(savedOrder, "Order created successfully in PENDING status."));
   }
@@ -50,37 +49,6 @@ public class OrdersController {
     public OrderCreated(Order order, String message) {
       this(order.getId(), order.getCustomerId(), order.getSize(), order.getAssignedCenter(), order.getCoordinates(),
           order.getStatus(), message);
-    }
-  }
-
-  public record OrderRequest(
-      Long customerId,
-      String size,
-      Coordinates coordinates
-  ) {
-
-    void verify() {
-      if (customerId == null
-          || size == null
-          || coordinates == null
-      ) {
-        throw new BadOrderException();
-      }
-    }
-
-    Order toOrder() {
-      var order = new Order();
-      order.setCustomerId(customerId);
-      order.setSize(size);
-      order.setCoordinates(coordinates);
-      return order;
-    }
-
-    public static class BadOrderException extends RuntimeException {
-
-      public BadOrderException() {
-        super("Bad Order.");
-      }
     }
   }
 }
