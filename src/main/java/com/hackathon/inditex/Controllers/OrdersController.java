@@ -3,8 +3,10 @@ package com.hackathon.inditex.Controllers;
 import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Services.OrdersService;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,16 +26,32 @@ public class OrdersController {
   }
 
   @PostMapping
-  public ResponseEntity<?> createOrder(@RequestBody Order order) {
-    Order savedOrder = ordersService.create(order);
-    return ResponseEntity.status(201)
-        .body(new OrderCreated(savedOrder, "Order created successfully in PENDING status."));
+  public ResponseEntity<OrderCreated> createOrder(@RequestBody OrderRequest request) {
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(new OrderCreated(
+            ordersService.create(request.toOrder()))
+        );
   }
 
   @GetMapping
-  public ResponseEntity<List<Order>> getAllOrders() {
-    List<Order> orders = ordersService.getAllOrders();
-    return ResponseEntity.ok(orders);
+  public ResponseEntity<Collection<Order>> getAllOrders() {
+    return ResponseEntity.ok(ordersService.getAllOrders());
+  }
+
+  public record OrderRequest(
+      Long customerId,
+      String size,
+      Coordinates coordinates
+  ) {
+
+    Order toOrder() {
+      var order = new Order();
+      order.setCustomerId(customerId);
+      order.setSize(size);
+      order.setCoordinates(coordinates);
+      return order;
+    }
   }
 
   public record OrderCreated(
@@ -46,9 +64,9 @@ public class OrdersController {
       String message
   ) {
 
-    public OrderCreated(Order order, String message) {
+    public OrderCreated(Order order) {
       this(order.getId(), order.getCustomerId(), order.getSize(), order.getAssignedCenter(), order.getCoordinates(),
-          order.getStatus(), message);
+          order.getStatus(), "Order created successfully in PENDING status.");
     }
   }
 }
