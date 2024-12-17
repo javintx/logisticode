@@ -57,7 +57,6 @@ class CentersServiceTest {
   @Test
   void testCreateNewLogisticsCenter_Success() {
     Center center = new Center();
-    center.setCapacity("B");
     center.setCurrentLoad(90);
     center.setMaxCapacity(100);
     when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.empty());
@@ -110,8 +109,13 @@ class CentersServiceTest {
     Long id = 1L;
     Center center = new Center();
     center.setName("New Center");
+    center.setCapacity("200");
+    center.setStatus("Active");
+    center.setCurrentLoad(50);
+    center.setMaxCapacity(200);
+    center.setCoordinates(new Coordinates(10.0, 10.0));
 
-    when(centersRepository.findById(id)).thenReturn(Optional.of(center));
+    when(centersRepository.existsById(id)).thenReturn(true);
     when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.empty());
 
     centersService.updateDetailsOfAnExistingLogisticsCenter(id, center);
