@@ -13,13 +13,13 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-USER appuser
+USER appuser:appgroup
 
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 3000
 
-CMD ["java", "-jar", "app.jar"]
-
 HEALTHCHECK --interval=60s --retries=5 --start-period=5s --timeout=10s \
   CMD wget --no-verbose --tries=1 --spider localhost:3000/health || exit 1
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
