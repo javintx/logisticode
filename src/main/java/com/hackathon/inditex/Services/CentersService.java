@@ -24,8 +24,8 @@ public class CentersService {
   }
 
   public void createNewLogisticsCenter(Center center) {
-    verifyLoadVsCapacityOf(center);
     verifyExistingCoordinatesOf(center);
+    verifyLoadVsCapacityOf(center);
     centersRepository.save(center);
   }
 
