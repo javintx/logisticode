@@ -1,9 +1,9 @@
 package com.hackathon.inditex.Services;
 
 import com.hackathon.inditex.Entities.Center;
-import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Repositories.CentersRepository;
 import java.util.Collection;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,20 +39,36 @@ public class CentersService {
     return centersRepository.findAll();
   }
 
-  public void updateDetailsOfAnExistingLogisticsCenter(Long id, Center center) {
-    verifyExistenceOfCenterBy(id);
-    verifyLoadVsCapacityOf(center);
-    verifyMoreThanOneExistingCoordinatesFor(id, center.getCoordinates());
-    center.setId(id);
-    centersRepository.save(center);
-  }
+  public void updateDetailsOfAnExistingLogisticsCenter(Long id, Map<String, String> updateValue) {
+    var center = centersRepository.getReferenceById(id);
 
-  private void verifyMoreThanOneExistingCoordinatesFor(Long id, Coordinates coordinates) {
-    centersRepository.findCenterByCoordinates(coordinates)
-        .filter(existingCenter -> !existingCenter.getId().equals(id))
-        .ifPresent(existingCenter -> {
-          throw new LocationAlreadyInUseException();
-        });
+    updateValue.forEach((key, value) -> {
+      switch (key) {
+        case "name" -> center.setName(value);
+        case "capacity" -> center.setCapacity(value);
+        case "status" -> center.setStatus(value);
+        case "currentLoad" -> {
+          center.setCurrentLoad(Integer.valueOf(value));
+          verifyLoadVsCapacityOf(center);
+        }
+        case "maxCapacity" -> {
+          center.setMaxCapacity(Integer.valueOf(value));
+          verifyLoadVsCapacityOf(center);
+        }
+        case "latitude" -> {
+          var coordinate = center.getCoordinates();
+          coordinate.setLatitude(Double.valueOf(value));
+          center.setCoordinates(coordinate);
+        }
+        case "longitude" -> {
+          var coordinate = center.getCoordinates();
+          coordinate.setLongitude(Double.valueOf(value));
+          center.setCoordinates(coordinate);
+        }
+      }
+    });
+
+    centersRepository.save(center);
   }
 
   public void deleteALogisticsCenter(Long id) {

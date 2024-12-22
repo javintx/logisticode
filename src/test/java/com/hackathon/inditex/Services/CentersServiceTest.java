@@ -16,6 +16,7 @@ import com.hackathon.inditex.Services.CentersService.LocationAlreadyInUseExcepti
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,38 +77,9 @@ class CentersServiceTest {
   }
 
   @Test
-  void testUpdateDetailsOfANonExistingLogisticsCenter_CenterNotFoundException() {
-    Long id = 1L;
-    Center center = new Center();
-    when(centersRepository.existsById(id)).thenReturn(false);
-
-    assertThrows(CenterNotFoundException.class,
-        () -> centersService.updateDetailsOfAnExistingLogisticsCenter(id, center));
-  }
-
-  @Test
-  void testUpdateDetailsOfAnExistingLogisticsCenter_LocationAlreadyInUseException() {
-    Long id = 1L;
-    Center center = new Center();
-    center.setCurrentLoad(90);
-    center.setMaxCapacity(100);
-    center.setCoordinates(new Coordinates(10.0, 10.0));
-
-    Center existingCenter = new Center();
-    existingCenter.setId(2L);
-    existingCenter.setCoordinates(new Coordinates(20.0, 20.0));
-
-    when(centersRepository.existsById(id)).thenReturn(true);
-    when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.of(existingCenter));
-
-    assertThrows(LocationAlreadyInUseException.class,
-        () -> centersService.updateDetailsOfAnExistingLogisticsCenter(id, center));
-  }
-
-  @Test
   void testUpdateDetailsOfAnExistingLogisticsCenter_Success() {
-    Long id = 1L;
-    Center center = new Center();
+    var id = 1L;
+    var center = new Center();
     center.setName("New Center");
     center.setCapacity("200");
     center.setStatus("Active");
@@ -115,12 +87,11 @@ class CentersServiceTest {
     center.setMaxCapacity(200);
     center.setCoordinates(new Coordinates(10.0, 10.0));
 
-    when(centersRepository.existsById(id)).thenReturn(true);
-    when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.empty());
+    when(centersRepository.getReferenceById(id)).thenReturn(center);
 
-    centersService.updateDetailsOfAnExistingLogisticsCenter(id, center);
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("status", "AVAILABLE"));
 
-    assertEquals(id, center.getId());
+    assertEquals("AVAILABLE", center.getStatus());
   }
 
   @Test

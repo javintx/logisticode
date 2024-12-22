@@ -5,7 +5,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Services.CentersService;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ public class CentersController {
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, String>> createNewLogisticsCenter(@RequestBody Center center) {
     centersService.createNewLogisticsCenter(center);
-    return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("message", "Logistics center created successfully."));
+    return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Logistics center created successfully."));
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
@@ -42,14 +41,14 @@ public class CentersController {
   }
 
   @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Map<String, String>> updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id, @RequestBody Center center) {
-    centersService.updateDetailsOfAnExistingLogisticsCenter(id, center);
-    return ResponseEntity.ok(Collections.singletonMap("message", "Logistics center updated successfully."));
+  public ResponseEntity<Map<String, String>> updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id, @RequestBody Map<String, String> requestUpdate) {
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, requestUpdate);
+    return ResponseEntity.ok(Map.of("message", "Logistics center updated successfully."));
   }
 
   @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, String>> deleteALogisticsCenter(@PathVariable Long id) {
     centersService.deleteALogisticsCenter(id);
-    return ResponseEntity.ok(Collections.singletonMap("message", "Logistics center deleted successfully."));
+    return ResponseEntity.ok(Map.of("message", "Logistics center deleted successfully."));
   }
 }

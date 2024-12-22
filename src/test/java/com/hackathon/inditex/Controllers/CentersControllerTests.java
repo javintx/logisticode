@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Services.CentersService;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class CentersControllerTests {
 
   @Test
   public void createNewLogisticsCenter_ReturnsCreated() throws Exception {
-    Center center = new Center();
+    var center = new Center();
     Mockito.doNothing().when(centersService).createNewLogisticsCenter(Mockito.any(Center.class));
 
     mockMvc.perform(post("/api/centers")
@@ -46,7 +46,7 @@ public class CentersControllerTests {
 
   @Test
   public void retrieveAllLogisticsCenters_ReturnsOk() throws Exception {
-    List<Center> centers = new ArrayList<>();
+    Collection<Center> centers = new ArrayList<>();
     centers.add(new Center());
     Mockito.when(centersService.retrieveAllLogisticsCenters()).thenReturn(centers);
 
@@ -58,10 +58,11 @@ public class CentersControllerTests {
 
   @Test
   public void updateDetailsOfAnExistingLogisticsCenter_ReturnsOk() throws Exception {
-    Long id = 1L;
-    Center center = new Center();
+    var id = 1L;
+    var center = new Center();
+    center.setStatus("AVAILABLE");
     Mockito.doNothing().when(centersService)
-        .updateDetailsOfAnExistingLogisticsCenter(Mockito.eq(id), Mockito.any(Center.class));
+        .updateDetailsOfAnExistingLogisticsCenter(Mockito.eq(id), Mockito.anyMap());
 
     mockMvc.perform(patch("/api/centers/{id}", id)
             .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +73,7 @@ public class CentersControllerTests {
 
   @Test
   public void deleteALogisticsCenter_ReturnsOk() throws Exception {
-    Long id = 1L;
+    var id = 1L;
     Mockito.doNothing().when(centersService).deleteALogisticsCenter(id);
 
     mockMvc.perform(delete("/api/centers/{id}", id)
