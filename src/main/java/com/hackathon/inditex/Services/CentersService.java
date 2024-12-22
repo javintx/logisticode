@@ -40,6 +40,8 @@ public class CentersService {
   }
 
   public void updateDetailsOfAnExistingLogisticsCenter(Long id, Map<String, String> updateValue) {
+    verifyExistenceOfCenterBy(id);
+
     var center = centersRepository.getReferenceById(id);
 
     updateValue.forEach((key, value) -> {
@@ -72,7 +74,6 @@ public class CentersService {
   }
 
   public void deleteALogisticsCenter(Long id) {
-    verifyExistenceOfCenterBy(id);
     centersRepository.deleteById(id);
   }
 
