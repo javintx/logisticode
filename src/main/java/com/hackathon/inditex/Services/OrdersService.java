@@ -31,38 +31,52 @@ public class OrdersService {
     return ordersRepository.findAll();
   }
 
-  public Collection<?> orderAssignations() {
-    var noCenterWithEnoughCapacity = thereIsNoCenterWithEnoughCapacity();
+  public Collection<Record> orderAssignations() {
     return ordersRepository.findByStatusOrderById("PENDING").stream()
         .map(order -> {
-          var availableCenter = getAvailableCenterFor(order);
+          var centersSupportingType = filterCentersSupportingType(
+              centersService.retrieveAllLogisticsCenters(), order.getSize());
+          if (centersSupportingType.isEmpty()) {
+            return new NotProcessedOrder(order.getId(), order.getStatus(),
+                "No available centers support the order type.");
+          }
+
+          var centersSupportingTypeWithEnoughCapacity = filterCentersWithEnoughCapacity(
+              centersSupportingType);
+          if (centersSupportingTypeWithEnoughCapacity.isEmpty()) {
+            return new NotProcessedOrder(order.getId(), order.getStatus(), "All centers are at maximum capacity.");
+          }
+
+          var availableCenter = filterCenterByDistance(centersSupportingTypeWithEnoughCapacity, order.getCoordinates());
 
           if (availableCenter.isPresent()) {
             return assignOrderToCenterAndUpdateItsCapacity(order, availableCenter.get());
           }
 
-          if (noCenterWithEnoughCapacity) {
-            return new NotProcessedOrder(order.getId(), order.getStatus(), "All centers are at maximum capacity.");
-          }
-
-          return new NotProcessedOrder(order.getId(), order.getStatus(),
-              "No available centers support the order type.");
-
+          return null;
         }).toList();
   }
 
-  private boolean thereIsNoCenterWithEnoughCapacity() {
-    return centersService.retrieveAllLogisticsCenters().stream()
-        .anyMatch(center -> center.getCurrentLoad() < center.getMaxCapacity());
+  private Collection<Center> filterCentersSupportingType(Collection<Center> centers, String type) {
+    return centers
+        .stream()
+        .filter(center -> center.getCapacity().equalsIgnoreCase(type))
+        .toList();
   }
 
-  private Optional<Center> getAvailableCenterFor(Order order) {
-    return centersService.retrieveAllLogisticsCenters().stream()
+  private Collection<Center> filterCentersWithEnoughCapacity(Collection<Center> centers) {
+    return centers
+        .stream()
         .filter(center -> center.getCurrentLoad() < center.getMaxCapacity())
-        .filter(center -> center.getCapacity().equals(order.getSize()))
+        .toList();
+  }
+
+  private Optional<Center> filterCenterByDistance(Collection<Center> centers, Coordinates coordinates) {
+    return centers
+        .stream()
         .min((center1, center2) -> Double.compare(
-            calculateHaversineDistance(order.getCoordinates(), center1.getCoordinates()),
-            calculateHaversineDistance(order.getCoordinates(), center2.getCoordinates())));
+            calculateHaversineDistance(coordinates, center1.getCoordinates()),
+            calculateHaversineDistance(coordinates, center2.getCoordinates())));
   }
 
   private ProcessedOrder assignOrderToCenterAndUpdateItsCapacity(Order order, Center center) {

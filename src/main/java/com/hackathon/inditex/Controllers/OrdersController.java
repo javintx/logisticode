@@ -39,7 +39,7 @@ public class OrdersController {
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Map<String, ?>> orderAssignations() {
+  public ResponseEntity<Map<String, Collection<Record>>> orderAssignations() {
     return ResponseEntity.ok(Map.of("processed-orders", ordersService.orderAssignations()));
   }
 }

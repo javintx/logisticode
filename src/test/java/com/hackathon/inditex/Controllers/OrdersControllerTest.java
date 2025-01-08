@@ -5,10 +5,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Services.OrdersService;
+import com.hackathon.inditex.Services.OrdersService.NotProcessedOrder;
+import com.hackathon.inditex.Services.OrdersService.ProcessedOrder;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +60,21 @@ public class OrdersControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().json(
             "[{\"id\":1,\"customerId\":1,\"size\":\"M\",\"assignedCenter\":null,\"coordinates\":null,\"status\":\"PENDING\"}]"));
+  }
+
+  @Test
+  public void testOrderAssignations() throws Exception {
+    var processedOrders = List.of(
+        new ProcessedOrder(10.0, 1L, "Center A"),
+        new NotProcessedOrder(2L, "PENDING", "Not processed")
+    );
+
+    Mockito.when(ordersService.orderAssignations()).thenReturn(processedOrders);
+
+    mockMvc.perform(post("/api/orders/order-assignations")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().json(
+            "{\"processed-orders\":[{\"distance\":10.0,\"orderId\":1,\"assignedLogisticsCenter\":\"Center A\",\"status\":\"ASSIGNED\"},{\"distance\":null,\"orderId\":2,\"assignedLogisticsCenter\":null,\"message\":\"Not processed\",\"status\":\"PENDING\"}]}"));
   }
 }
