@@ -4,12 +4,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.hackathon.inditex.DTO.OrderCreated;
 import com.hackathon.inditex.DTO.OrderRequest;
-import com.hackathon.inditex.Entities.Order;
+import com.hackathon.inditex.DTO.Orders;
 import com.hackathon.inditex.Services.OrdersService;
-import java.util.Collection;
 import java.util.Map;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,19 +33,13 @@ public class OrdersController {
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Collection<Order>> getAllOrders() {
-    return ResponseEntity.ok(ordersService.getAllOrders());
+  public ResponseEntity<Orders> getAllOrders() {
+    return ResponseEntity.ok(Orders.of(ordersService.getAllOrders()));
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, ?>> orderAssignations() {
     return ResponseEntity.ok(Map.of("processed-orders", ordersService.orderAssignations()));
-  }
-
-  @NoArgsConstructor
-  @RequiredArgsConstructor
-  private static class test {
-    private String field;
   }
 }
 
