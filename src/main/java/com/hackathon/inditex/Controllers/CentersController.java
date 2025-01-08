@@ -2,9 +2,10 @@ package com.hackathon.inditex.Controllers;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import com.hackathon.inditex.DTO.Centers;
+import com.hackathon.inditex.DTO.MessageResponse;
 import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Services.CentersService;
-import java.util.Collection;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,25 +31,28 @@ public class CentersController {
   }
 
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Map<String, String>> createNewLogisticsCenter(@RequestBody Center center) {
+  public ResponseEntity<MessageResponse> createNewLogisticsCenter(@RequestBody Center center) {
     centersService.createNewLogisticsCenter(center);
-    return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Logistics center created successfully."));
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(new MessageResponse("Logistics center created successfully."));
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Collection<Center>> retrieveAllLogisticsCenters() {
-    return ResponseEntity.ok(centersService.retrieveAllLogisticsCenters());
+  public ResponseEntity<Centers> retrieveAllLogisticsCenters() {
+    return ResponseEntity.ok(Centers.of(centersService.retrieveAllLogisticsCenters()));
   }
 
   @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Map<String, String>> updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id, @RequestBody Map<String, String> requestUpdate) {
+  public ResponseEntity<MessageResponse> updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id,
+      @RequestBody Map<String, String> requestUpdate) {
     centersService.updateDetailsOfAnExistingLogisticsCenter(id, requestUpdate);
-    return ResponseEntity.ok(Map.of("message", "Logistics center updated successfully."));
+    return ResponseEntity.ok(new MessageResponse("Logistics center updated successfully."));
   }
 
   @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Map<String, String>> deleteALogisticsCenter(@PathVariable Long id) {
+  public ResponseEntity<MessageResponse> deleteALogisticsCenter(@PathVariable Long id) {
     centersService.deleteALogisticsCenter(id);
-    return ResponseEntity.ok(Map.of("message", "Logistics center deleted successfully."));
+    return ResponseEntity.ok(new MessageResponse("Logistics center deleted successfully."));
   }
 }
