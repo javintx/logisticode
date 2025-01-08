@@ -4,8 +4,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.hackathon.inditex.DTO.OrderCreated;
 import com.hackathon.inditex.DTO.OrderRequest;
-import com.hackathon.inditex.DTO.Orders;
+import com.hackathon.inditex.DTO.OrderResponse;
 import com.hackathon.inditex.Services.OrdersService;
+import java.util.Collection;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,8 +34,8 @@ public class OrdersController {
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Orders> getAllOrders() {
-    return ResponseEntity.ok(Orders.of(ordersService.getAllOrders()));
+  public ResponseEntity<Collection<OrderResponse>> getAllOrders() {
+    return ResponseEntity.ok(ordersService.getAllOrders().stream().map(OrderResponse::of).toList());
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)

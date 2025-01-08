@@ -39,7 +39,7 @@ public class OrdersControllerTest {
     mockMvc.perform(post("/api/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"customerId\":1,\"size\":\"M\"}"))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(content().json(
             "{\"orderId\":1,\"customerId\":1,\"size\":\"M\",\"assignedLogisticsCenter\":null,\"coordinates\":null,\"status\":\"PENDING\",\"message\":\"Order created successfully in PENDING status.\"}"));
   }

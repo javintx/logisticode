@@ -2,10 +2,11 @@ package com.hackathon.inditex.Controllers;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.hackathon.inditex.DTO.Centers;
+import com.hackathon.inditex.DTO.CenterResponse;
 import com.hackathon.inditex.DTO.MessageResponse;
 import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Services.CentersService;
+import java.util.Collection;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,8 @@ public class CentersController {
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  public ResponseEntity<Centers> retrieveAllLogisticsCenters() {
-    return ResponseEntity.ok(Centers.of(centersService.retrieveAllLogisticsCenters()));
+  public ResponseEntity<Collection<CenterResponse>> retrieveAllLogisticsCenters() {
+    return ResponseEntity.ok(centersService.retrieveAllLogisticsCenters().stream().map(CenterResponse::of).toList());
   }
 
   @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
