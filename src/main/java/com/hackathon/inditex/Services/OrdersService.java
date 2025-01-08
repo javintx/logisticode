@@ -33,31 +33,27 @@ public class OrdersService {
 
   public Collection<Record> orderAssignations() {
     return ordersRepository.findByStatusOrderById("PENDING").stream()
-        .map(order -> {
-          var centersSupportingType = filterCentersSupportingType(
-              centersService.retrieveAllLogisticsCenters(), order.getSize());
-          if (centersSupportingType.isEmpty()) {
-            return new NotProcessedOrder(order.getId(), order.getStatus(),
-                "No available centers support the order type.");
-          }
-
-          var centersSupportingTypeWithEnoughCapacity = filterCentersWithEnoughCapacity(
-              centersSupportingType);
-          if (centersSupportingTypeWithEnoughCapacity.isEmpty()) {
-            return new NotProcessedOrder(order.getId(), order.getStatus(), "All centers are at maximum capacity.");
-          }
-
-          var availableCenter = filterCenterByDistance(centersSupportingTypeWithEnoughCapacity, order.getCoordinates());
-
-          if (availableCenter.isPresent()) {
-            return assignOrderToCenterAndUpdateItsCapacity(order, availableCenter.get());
-          }
-
-          return null;
-        }).toList();
+        .map(this::processOrder)
+        .flatMap(Optional::stream)
+        .toList();
   }
 
-  private Collection<Center> filterCentersSupportingType(Collection<Center> centers, String type) {
+  private Optional<Record> processOrder(Order order) {
+    var centers = filterCentersThatSupportType(centersService.retrieveAllLogisticsCenters(), order.getSize());
+    if (centers.isEmpty()) {
+      return Optional.of(NotProcessedOrder.byType(order.getId(), order.getStatus()));
+    }
+
+    centers = filterCentersWithEnoughCapacity(centers);
+    if (centers.isEmpty()) {
+      return Optional.of(NotProcessedOrder.byCapacity(order.getId(), order.getStatus()));
+    }
+
+    var availableCenter = sortCentersByDistance(centers, order.getCoordinates());
+    return availableCenter.map(center -> assignOrderToCenterAndUpdateItsCapacity(order, center));
+  }
+
+  private Collection<Center> filterCentersThatSupportType(Collection<Center> centers, String type) {
     return centers
         .stream()
         .filter(center -> center.getCapacity().equalsIgnoreCase(type))
@@ -71,7 +67,7 @@ public class OrdersService {
         .toList();
   }
 
-  private Optional<Center> filterCenterByDistance(Collection<Center> centers, Coordinates coordinates) {
+  private Optional<Center> sortCentersByDistance(Collection<Center> centers, Coordinates coordinates) {
     return centers
         .stream()
         .min((center1, center2) -> Double.compare(
@@ -79,7 +75,7 @@ public class OrdersService {
             calculateHaversineDistance(coordinates, center2.getCoordinates())));
   }
 
-  private ProcessedOrder assignOrderToCenterAndUpdateItsCapacity(Order order, Center center) {
+  private Record assignOrderToCenterAndUpdateItsCapacity(Order order, Center center) {
     order.setAssignedCenter(center.getName());
     order.setStatus("ASSIGNED");
     ordersRepository.save(order);
@@ -122,8 +118,12 @@ public class OrdersService {
       String status
   ) {
 
-    public NotProcessedOrder(long orderId, String status, String message) {
-      this(null, orderId, null, message, status);
+    public static NotProcessedOrder byType(long orderId, String status) {
+      return new NotProcessedOrder(null, orderId, null, "No available centers support the order type.", status);
+    }
+
+    public static NotProcessedOrder byCapacity(long orderId, String status) {
+      return new NotProcessedOrder(null, orderId, null, "All centers are at maximum capacity.", status);
     }
   }
 }
