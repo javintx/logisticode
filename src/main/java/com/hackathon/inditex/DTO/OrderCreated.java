@@ -14,8 +14,14 @@ public record OrderCreated(
 ) {
 
   public static OrderCreated of(Order order) {
-    return new OrderCreated(order.getId(), order.getCustomerId(), order.getSize(), order.getAssignedCenter(),
+    return new OrderCreated(
+        order.getId(),
+        order.getCustomerId(),
+        order.getSize(),
+        order.getAssignedCenter(),
         order.getCoordinates(),
-        order.getStatus(), "Order created successfully in PENDING status.");
+        order.getStatus(),
+        "Order created successfully in PENDING status."
+    );
   }
 }
