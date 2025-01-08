@@ -88,18 +88,28 @@ public class OrdersService {
     return EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  public record ProcessedOrder(Double distance, long id, String assignedLogisticsCenter, String status) {
+  public record ProcessedOrder(
+      Double distance,
+      long orderId,
+      String assignedLogisticsCenter,
+      String status
+  ) {
 
-    public ProcessedOrder(Double distance, long id, String assignedLogisticsCenter) {
-      this(distance, id, assignedLogisticsCenter, "ASSIGNED");
+    public ProcessedOrder(Double distance, long orderId, String assignedLogisticsCenter) {
+      this(distance, orderId, assignedLogisticsCenter, "ASSIGNED");
     }
   }
 
-  public record NotProcessedOrder(Double distance, long id, String assignedLogisticsCenter,
-                                  String message, String status) {
+  public record NotProcessedOrder(
+      Double distance,
+      long orderId,
+      String assignedLogisticsCenter,
+      String message,
+      String status
+  ) {
 
-    public NotProcessedOrder(long id, String status, String message) {
-      this(null, id, null, message, status);
+    public NotProcessedOrder(long orderId, String status, String message) {
+      this(null, orderId, null, message, status);
     }
   }
 }
