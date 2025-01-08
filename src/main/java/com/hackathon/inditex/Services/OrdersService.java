@@ -32,6 +32,7 @@ public class OrdersService {
   }
 
   public Collection<?> orderAssignations() {
+    var noCenterWithEnoughCapacity = thereIsNoCenterWithEnoughCapacity();
     return ordersRepository.findByStatusOrderById("PENDING").stream()
         .map(order -> {
           var availableCenter = getAvailableCenterFor(order);
@@ -40,7 +41,7 @@ public class OrdersService {
             return assignOrderToCenterAndUpdateItsCapacity(order, availableCenter.get());
           }
 
-          if (thereIsNoCenterWithEnoughCapacity()) {
+          if (noCenterWithEnoughCapacity) {
             return new NotProcessedOrder(order.getId(), order.getStatus(), "All centers are at maximum capacity.");
           }
 
