@@ -40,47 +40,41 @@ public class CentersService {
   }
 
   public void updateDetailsOfAnExistingLogisticsCenter(Long id, Map<String, String> updateValue) {
-    verifyExistenceOfCenterBy(id);
+    var center = centersRepository.findById(id).orElseThrow(CenterNotFoundException::new);
 
-    var center = centersRepository.getReferenceById(id);
-
-    updateValue.forEach((key, value) -> {
-      switch (key) {
-        case "name" -> center.setName(value);
-        case "capacity" -> center.setCapacity(value);
-        case "status" -> center.setStatus(value);
-        case "currentLoad" -> {
-          center.setCurrentLoad(Integer.valueOf(value));
-          verifyLoadVsCapacityOf(center);
-        }
-        case "maxCapacity" -> {
-          center.setMaxCapacity(Integer.valueOf(value));
-          verifyLoadVsCapacityOf(center);
-        }
-        case "latitude" -> {
-          var coordinate = center.getCoordinates();
-          coordinate.setLatitude(Double.valueOf(value));
-          center.setCoordinates(coordinate);
-        }
-        case "longitude" -> {
-          var coordinate = center.getCoordinates();
-          coordinate.setLongitude(Double.valueOf(value));
-          center.setCoordinates(coordinate);
-        }
-      }
-    });
+    updateValue.forEach((key, value) -> updateCenterField(center, key, value));
 
     centersRepository.save(center);
   }
 
-  public void deleteALogisticsCenter(Long id) {
-    centersRepository.deleteById(id);
+  private void updateCenterField(Center center, String key, String value) {
+    switch (key) {
+      case "name" -> center.setName(value);
+      case "capacity" -> center.setCapacity(value);
+      case "status" -> center.setStatus(value);
+      case "currentLoad" -> {
+        center.setCurrentLoad(Integer.valueOf(value));
+        verifyLoadVsCapacityOf(center);
+      }
+      case "maxCapacity" -> {
+        center.setMaxCapacity(Integer.valueOf(value));
+        verifyLoadVsCapacityOf(center);
+      }
+      case "latitude" -> {
+        var coordinate = center.getCoordinates();
+        coordinate.setLatitude(Double.valueOf(value));
+        center.setCoordinates(coordinate);
+      }
+      case "longitude" -> {
+        var coordinate = center.getCoordinates();
+        coordinate.setLongitude(Double.valueOf(value));
+        center.setCoordinates(coordinate);
+      }
+    }
   }
 
-  private void verifyExistenceOfCenterBy(Long id) {
-    if (!centersRepository.existsById(id)) {
-      throw new CenterNotFoundException();
-    }
+  public void deleteALogisticsCenter(Long id) {
+    centersRepository.deleteById(id);
   }
 
   public static class LocationAlreadyInUseException extends RuntimeException {
