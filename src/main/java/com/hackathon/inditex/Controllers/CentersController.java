@@ -39,25 +39,17 @@ public class CentersController {
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.OK)
   public Collection<CenterResponse> retrieveAllLogisticsCenters() {
-    return centersService
-        .retrieveAllLogisticsCenters()
-        .stream()
-        .map(CenterResponse::of)
-        .toList();
+    return centersService.retrieveAllLogisticsCenters().stream().map(CenterResponse::of).toList();
   }
 
   @PatchMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.OK)
-  public MessageResponse updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id,
-      @RequestBody Map<String, String> requestUpdate) {
+  public MessageResponse updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id, @RequestBody Map<String, String> requestUpdate) {
     centersService.updateDetailsOfAnExistingLogisticsCenter(id, requestUpdate);
     return new MessageResponse("Logistics center updated successfully.");
   }
 
   @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.OK)
   public MessageResponse deleteALogisticsCenter(@PathVariable Long id) {
     centersService.deleteALogisticsCenter(id);
     return new MessageResponse("Logistics center deleted successfully.");
