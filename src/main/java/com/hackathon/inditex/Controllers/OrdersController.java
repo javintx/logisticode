@@ -10,11 +10,11 @@ import java.util.Collection;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,25 +29,18 @@ public class OrdersController {
   }
 
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
-  public OrderCreated createOrder(@RequestBody OrderRequest request) {
-    return OrderCreated.of(ordersService.create(request.toOrder()));
+  public ResponseEntity<OrderCreated> createOrder(@RequestBody OrderRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(OrderCreated.of(ordersService.create(request.toOrder())));
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.OK)
-  public Collection<OrderResponse> getAllOrders() {
-    return ordersService
-        .getAllOrders()
-        .stream()
-        .map(OrderResponse::of)
-        .toList();
+  public ResponseEntity<Collection<OrderResponse>> getAllOrders() {
+    return ResponseEntity.ok(ordersService.getAllOrders().stream().map(OrderResponse::of).toList());
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.OK)
-  public Map<String, Collection<Record>> orderAssignations() {
-    return Map.of("processed-orders", ordersService.orderAssignations());
+  public ResponseEntity<Map<String, Collection<Record>>> orderAssignations() {
+    return ResponseEntity.ok(Map.of("processed-orders", ordersService.orderAssignations()));
   }
 }
 
