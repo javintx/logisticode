@@ -1,9 +1,6 @@
 package com.hackathon.inditex.Services;
 
 import com.hackathon.inditex.Entities.Center;
-import com.hackathon.inditex.Exceptions.CenterNotFoundException;
-import com.hackathon.inditex.Exceptions.LoadCapacityExceededException;
-import com.hackathon.inditex.Exceptions.LocationAlreadyInUseException;
 import com.hackathon.inditex.Repositories.CentersRepository;
 import java.util.Collection;
 import java.util.Map;
@@ -96,6 +93,27 @@ public class CentersService {
 
   public void deleteALogisticsCenter(Long id) {
     centersRepository.deleteById(id);
+  }
+
+  public static class LocationAlreadyInUseException extends RuntimeException {
+
+    public LocationAlreadyInUseException() {
+      super("There is already a logistics center in that position.");
+    }
+  }
+
+  public static class LoadCapacityExceededException extends RuntimeException {
+
+    public LoadCapacityExceededException() {
+      super("Current load cannot exceed max capacity.");
+    }
+  }
+
+  public static class CenterNotFoundException extends RuntimeException {
+
+    public CenterNotFoundException() {
+      super("Center not found.");
+    }
   }
 
 }
