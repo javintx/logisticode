@@ -5,8 +5,8 @@ import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Repositories.OrdersRepository;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,45 +34,40 @@ public class OrdersService {
   public Collection<Record> orderAssignations() {
     return ordersRepository.findByStatusOrderById("PENDING").stream()
         .map(this::processOrder)
-        .flatMap(Optional::stream)
         .toList();
   }
 
-  private Optional<Record> processOrder(Order order) {
+  private Record processOrder(Order order) {
     var centers = filterCentersThatSupportType(centersService.retrieveAllLogisticsCenters(), order.getSize());
     if (centers.isEmpty()) {
-      return Optional.of(NotProcessedOrder.byType(order.getId(), order.getStatus()));
+      return NotProcessedOrder.byType(order.getId(), order.getStatus());
     }
 
     centers = filterCentersWithEnoughCapacity(centers);
     if (centers.isEmpty()) {
-      return Optional.of(NotProcessedOrder.byCapacity(order.getId(), order.getStatus()));
+      return NotProcessedOrder.byCapacity(order.getId(), order.getStatus());
     }
 
-    var availableCenter = sortCentersByDistance(centers, order.getCoordinates());
-    return availableCenter.map(center -> assignOrderToCenterAndUpdateItsCapacity(order, center));
+    var availableCenters = sortCentersByDistance(centers, order.getCoordinates());
+    return assignOrderToCenterAndUpdateItsCapacity(order, availableCenters.iterator().next());
   }
 
   private Collection<Center> filterCentersThatSupportType(Collection<Center> centers, String type) {
-    return centers
-        .stream()
+    return centers.stream()
         .filter(center -> center.getCapacity().equalsIgnoreCase(type))
         .toList();
   }
 
   private Collection<Center> filterCentersWithEnoughCapacity(Collection<Center> centers) {
-    return centers
-        .stream()
+    return centers.stream()
         .filter(center -> center.getCurrentLoad() < center.getMaxCapacity())
         .toList();
   }
 
-  private Optional<Center> sortCentersByDistance(Collection<Center> centers, Coordinates coordinates) {
-    return centers
-        .stream()
-        .min((center1, center2) -> Double.compare(
-            calculateHaversineDistance(coordinates, center1.getCoordinates()),
-            calculateHaversineDistance(coordinates, center2.getCoordinates())));
+  private Collection<Center> sortCentersByDistance(Collection<Center> centers, Coordinates coordinates) {
+    return centers.stream()
+        .sorted(Comparator.comparingDouble(center -> calculateHaversineDistance(coordinates, center.getCoordinates())))
+        .toList();
   }
 
   private Record assignOrderToCenterAndUpdateItsCapacity(Order order, Center center) {
