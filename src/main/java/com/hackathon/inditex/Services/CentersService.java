@@ -18,9 +18,13 @@ public class CentersService {
   }
 
   private static void verifyLoadVsCapacityOf(Center center) {
-    if (center.getCurrentLoad() > center.getMaxCapacity()) {
+    if (isLoadExceedingCapacity(center)) {
       throw new LoadCapacityExceededException();
     }
+  }
+
+  private static boolean isLoadExceedingCapacity(Center center) {
+    return center.getCurrentLoad() > center.getMaxCapacity();
   }
 
   public void createNewLogisticsCenter(Center center) {
@@ -40,11 +44,17 @@ public class CentersService {
   }
 
   public void updateDetailsOfAnExistingLogisticsCenter(Long id, Map<String, String> updateValue) {
-    var center = centersRepository.findById(id).orElseThrow(CenterNotFoundException::new);
-
-    updateValue.forEach((key, value) -> updateCenterField(center, key, value));
-
+    var center = getCenterById(id);
+    updateCenterFields(center, updateValue);
     centersRepository.save(center);
+  }
+
+  private Center getCenterById(Long id) {
+    return centersRepository.findById(id).orElseThrow(CenterNotFoundException::new);
+  }
+
+  private void updateCenterFields(Center center, Map<String, String> updateValue) {
+    updateValue.forEach((key, value) -> updateCenterField(center, key, value));
   }
 
   private void updateCenterField(Center center, String key, String value) {
@@ -52,25 +62,33 @@ public class CentersService {
       case "name" -> center.setName(value);
       case "capacity" -> center.setCapacity(value);
       case "status" -> center.setStatus(value);
-      case "currentLoad" -> {
-        center.setCurrentLoad(Integer.valueOf(value));
-        verifyLoadVsCapacityOf(center);
-      }
-      case "maxCapacity" -> {
-        center.setMaxCapacity(Integer.valueOf(value));
-        verifyLoadVsCapacityOf(center);
-      }
-      case "latitude" -> {
-        var coordinate = center.getCoordinates();
-        coordinate.setLatitude(Double.valueOf(value));
-        center.setCoordinates(coordinate);
-      }
-      case "longitude" -> {
-        var coordinate = center.getCoordinates();
-        coordinate.setLongitude(Double.valueOf(value));
-        center.setCoordinates(coordinate);
-      }
+      case "currentLoad" -> updateCurrentLoad(center, value);
+      case "maxCapacity" -> updateMaxCapacity(center, value);
+      case "latitude" -> updateLatitude(center, value);
+      case "longitude" -> updateLongitude(center, value);
     }
+  }
+
+  private void updateCurrentLoad(Center center, String value) {
+    center.setCurrentLoad(Integer.valueOf(value));
+    verifyLoadVsCapacityOf(center);
+  }
+
+  private void updateMaxCapacity(Center center, String value) {
+    center.setMaxCapacity(Integer.valueOf(value));
+    verifyLoadVsCapacityOf(center);
+  }
+
+  private void updateLatitude(Center center, String value) {
+    var coordinate = center.getCoordinates();
+    coordinate.setLatitude(Double.valueOf(value));
+    center.setCoordinates(coordinate);
+  }
+
+  private void updateLongitude(Center center, String value) {
+    var coordinate = center.getCoordinates();
+    coordinate.setLongitude(Double.valueOf(value));
+    center.setCoordinates(coordinate);
   }
 
   public void deleteALogisticsCenter(Long id) {
