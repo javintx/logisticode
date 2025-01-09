@@ -13,7 +13,7 @@ public record OrderCreated(
     String message
 ) {
 
-  public static OrderCreated of(Order order) {
+  public static OrderCreated from(Order order) {
     return new OrderCreated(
         order.getId(),
         order.getCustomerId(),

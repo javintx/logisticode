@@ -31,12 +31,12 @@ public class OrdersController {
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public OrderCreated createOrder(@RequestBody OrderRequest request) {
-    return OrderCreated.of(ordersService.create(request.toOrder()));
+    return OrderCreated.from(ordersService.create(request.toOrder()));
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
   public Collection<OrderResponse> getAllOrders() {
-    return ordersService.getAllOrders().stream().map(OrderResponse::of).toList();
+    return ordersService.getAllOrders().stream().map(OrderResponse::from).toList();
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)
