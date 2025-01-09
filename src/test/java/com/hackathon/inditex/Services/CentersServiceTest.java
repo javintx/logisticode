@@ -3,16 +3,17 @@ package com.hackathon.inditex.Services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Entities.Coordinates;
-import com.hackathon.inditex.Repositories.CentersRepository;
 import com.hackathon.inditex.Exceptions.CenterNotFoundException;
 import com.hackathon.inditex.Exceptions.LoadCapacityExceededException;
 import com.hackathon.inditex.Exceptions.LocationAlreadyInUseException;
+import com.hackathon.inditex.Repositories.CentersRepository;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -81,34 +82,46 @@ class CentersServiceTest {
     var id = 1L;
     var center = new Center();
     center.setName("New Center");
-    center.setCapacity("200");
+    center.setCapacity("XL");
     center.setStatus("Active");
     center.setCurrentLoad(50);
     center.setMaxCapacity(200);
     center.setCoordinates(new Coordinates(10.0, 10.0));
 
-    when(centersRepository.getReferenceById(id)).thenReturn(center);
+    when(centersRepository.findById(id)).thenReturn(Optional.of(center));
 
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("name", "new name"));
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("capacity", "S"));
     centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("status", "AVAILABLE"));
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("currentLoad", "5"));
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("maxCapacity", "15"));
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("latitude", "5.5"));
+    centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("longitude", "5.5"));
 
+    assertEquals("new name", center.getName());
+    assertEquals("S", center.getCapacity());
     assertEquals("AVAILABLE", center.getStatus());
+    assertEquals(5, center.getCurrentLoad());
+    assertEquals(15, center.getMaxCapacity());
+    assertEquals(5.5, center.getCoordinates().getLatitude());
+    assertEquals(5.5, center.getCoordinates().getLongitude());
+  }
+
+  @Test
+  void testUpdateDetailsOfAnExistingLogisticsCenter_CenterNotFoundException() {
+    var id = 1L;
+    when(centersRepository.findById(id)).thenReturn(Optional.empty());
+    assertThrows(CenterNotFoundException.class,
+        () -> centersService.updateDetailsOfAnExistingLogisticsCenter(id, Map.of("something", "potato")));
   }
 
   @Test
   void testDeleteALogisticsCenter_Success() {
     Long id = 1L;
-    when(centersRepository.existsById(id)).thenReturn(true);
+    doNothing().when(centersRepository).deleteById(id);
 
     centersService.deleteALogisticsCenter(id);
 
     verify(centersRepository, times(1)).deleteById(id);
-  }
-
-  @Test
-  void testDeleteALogisticsCenter_CenterNotFoundException() {
-    Long id = 1L;
-    when(centersRepository.existsById(id)).thenReturn(false);
-
-    assertThrows(CenterNotFoundException.class, () -> centersService.deleteALogisticsCenter(id));
   }
 }
