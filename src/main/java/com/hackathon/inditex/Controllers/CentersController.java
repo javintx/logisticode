@@ -34,9 +34,7 @@ public class CentersController {
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
   public ResponseEntity<MessageResponse> createNewLogisticsCenter(@RequestBody Center center) {
     centersService.createNewLogisticsCenter(center);
-    return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(new MessageResponse("Logistics center created successfully."));
+    return createMessageResponse(HttpStatus.CREATED, "Logistics center created successfully.");
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
@@ -48,12 +46,16 @@ public class CentersController {
   public ResponseEntity<MessageResponse> updateDetailsOfAnExistingLogisticsCenter(@PathVariable Long id,
       @RequestBody Map<String, String> requestUpdate) {
     centersService.updateDetailsOfAnExistingLogisticsCenter(id, requestUpdate);
-    return ResponseEntity.ok(new MessageResponse("Logistics center updated successfully."));
+    return createMessageResponse(HttpStatus.OK, "Logistics center updated successfully.");
   }
 
   @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
   public ResponseEntity<MessageResponse> deleteALogisticsCenter(@PathVariable Long id) {
     centersService.deleteALogisticsCenter(id);
-    return ResponseEntity.ok(new MessageResponse("Logistics center deleted successfully."));
+    return createMessageResponse(HttpStatus.OK, "Logistics center deleted successfully.");
+  }
+
+  private ResponseEntity<MessageResponse> createMessageResponse(HttpStatus status, String message) {
+    return ResponseEntity.status(status).body(new MessageResponse(message));
   }
 }
