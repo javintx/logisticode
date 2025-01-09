@@ -35,11 +35,17 @@ public class OrdersController {
   }
 
   @GetMapping(produces = APPLICATION_JSON_VALUE)
+  @ResponseStatus(HttpStatus.OK)
   public Collection<OrderResponse> getAllOrders() {
-    return ordersService.getAllOrders().stream().map(OrderResponse::of).toList();
+    return ordersService
+        .getAllOrders()
+        .stream()
+        .map(OrderResponse::of)
+        .toList();
   }
 
   @PostMapping(path = "/order-assignations", produces = APPLICATION_JSON_VALUE)
+  @ResponseStatus(HttpStatus.OK)
   public Map<String, Collection<Record>> orderAssignations() {
     return Map.of("processed-orders", ordersService.orderAssignations());
   }
