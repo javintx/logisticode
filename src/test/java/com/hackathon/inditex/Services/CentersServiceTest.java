@@ -15,8 +15,6 @@ import com.hackathon.inditex.Exceptions.LoadCapacityExceededException;
 import com.hackathon.inditex.Exceptions.LocationAlreadyInUseException;
 import com.hackathon.inditex.Repositories.CentersRepository;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +37,7 @@ class CentersServiceTest {
 
   @Test
   void testCreateNewLogisticsCenter_LoadCapacityExceededException() {
-    Center center = new Center();
+    var center = new Center();
     center.setCurrentLoad(110);
     center.setMaxCapacity(100);
 
@@ -48,7 +46,7 @@ class CentersServiceTest {
 
   @Test
   void testCreateNewLogisticsCenter_LocationAlreadyInUseException() {
-    Center center = new Center();
+    var center = new Center();
     center.setCurrentLoad(90);
     center.setMaxCapacity(100);
     when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.of(center));
@@ -58,7 +56,7 @@ class CentersServiceTest {
 
   @Test
   void testCreateNewLogisticsCenter_Success() {
-    Center center = new Center();
+    var center = new Center();
     center.setCurrentLoad(90);
     center.setMaxCapacity(100);
     when(centersRepository.findCenterByCoordinates(center.getCoordinates())).thenReturn(Optional.empty());
@@ -68,10 +66,10 @@ class CentersServiceTest {
 
   @Test
   void testRetrieveAllLogisticsCenters() {
-    List<Center> centers = Arrays.asList(new Center(), new Center());
+    var centers = Arrays.asList(new Center(), new Center());
     when(centersRepository.findAll()).thenReturn(centers);
 
-    Collection<Center> result = centersService.retrieveAllLogisticsCenters();
+    var result = centersService.retrieveAllLogisticsCenters();
 
     assertEquals(centers.size(), result.size());
     assertTrue(result.containsAll(centers));
@@ -117,7 +115,7 @@ class CentersServiceTest {
 
   @Test
   void testDeleteALogisticsCenter_Success() {
-    Long id = 1L;
+    var id = 1L;
     doNothing().when(centersRepository).deleteById(id);
 
     centersService.deleteALogisticsCenter(id);

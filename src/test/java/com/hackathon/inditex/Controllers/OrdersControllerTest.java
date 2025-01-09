@@ -30,7 +30,7 @@ public class OrdersControllerTest {
 
   @Test
   public void testCreateOrder() throws Exception {
-    Order order = new Order();
+    var order = new Order();
     order.setId(1L);
     order.setCustomerId(1L);
     order.setSize("M");
@@ -48,7 +48,7 @@ public class OrdersControllerTest {
 
   @Test
   public void testGetAllOrders() throws Exception {
-    Order order = new Order();
+    var order = new Order();
     order.setId(1L);
     order.setCustomerId(1L);
     order.setSize("M");
@@ -62,19 +62,19 @@ public class OrdersControllerTest {
             "[{\"id\":1,\"customerId\":1,\"size\":\"M\",\"assignedCenter\":null,\"coordinates\":null,\"status\":\"PENDING\"}]"));
   }
 
-//  @Test
-//  public void testOrderAssignations() throws Exception {
-//    var processedOrders = List.of(
-//        new ProcessedOrder(10.0, 1L, "Center A"),
-//        new NotProcessedOrder(2L, "PENDING", "Not processed")
-//    );
-//
-//    Mockito.when(ordersService.orderAssignations()).thenReturn(processedOrders);
-//
-//    mockMvc.perform(post("/api/orders/order-assignations")
-//            .contentType(MediaType.APPLICATION_JSON))
-//        .andExpect(status().isOk())
-//        .andExpect(content().json(
-//            "{\"processed-orders\":[{\"distance\":10.0,\"orderId\":1,\"assignedLogisticsCenter\":\"Center A\",\"status\":\"ASSIGNED\"},{\"distance\":null,\"orderId\":2,\"assignedLogisticsCenter\":null,\"message\":\"Not processed\",\"status\":\"PENDING\"}]}"));
-//  }
+  @Test
+  public void testOrderAssignations() throws Exception {
+    var processedOrders = List.of(
+        new ProcessedOrder(10.0, 1L, "Center A"),
+        new NotProcessedOrder(2.0, 2L, null, "Not processed", "PENDING")
+    );
+
+    Mockito.when(ordersService.orderAssignations()).thenReturn(processedOrders);
+
+    mockMvc.perform(post("/api/orders/order-assignations")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().json(
+            "{\"processed-orders\":[{\"distance\":10.0,\"orderId\":1,\"assignedLogisticsCenter\":\"Center A\",\"status\":\"ASSIGNED\"},{\"distance\":2,\"orderId\":2,\"assignedLogisticsCenter\":null,\"message\":\"Not processed\",\"status\":\"PENDING\"}]}"));
+  }
 }
