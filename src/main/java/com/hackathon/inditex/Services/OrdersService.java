@@ -50,8 +50,15 @@ public class OrdersService {
       return NotProcessedOrder.byCapacity(order.getId(), order.getStatus());
     }
 
-    var availableCenters = sortCentersByDistance(centers, order.getCoordinates());
-    return assignOrderToCenterAndUpdateItsCapacity(order, availableCenters.iterator().next());
+    return assignOrderToCenter(order, centers);
+  }
+
+  private ProcessedOrder assignOrderToCenter(Order order, Collection<Center> centers) {
+    var availableCenter = sortCentersByDistance(centers, order.getCoordinates()).iterator().next();
+    assignOrder(order, availableCenter.getName());
+    increaseCenterLoad(availableCenter.getId(), availableCenter.getCurrentLoad() + 1);
+    return new ProcessedOrder(calculateHaversineDistance(order.getCoordinates(), availableCenter.getCoordinates()),
+        order.getId(), availableCenter.getName());
   }
 
   private Collection<Center> filterCentersThatSupportType(Collection<Center> centers, String type) {
@@ -72,14 +79,15 @@ public class OrdersService {
         .toList();
   }
 
-  private Record assignOrderToCenterAndUpdateItsCapacity(Order order, Center center) {
-    order.setAssignedCenter(center.getName());
+  private void increaseCenterLoad(Long centerId, Integer centerCurrentLoad) {
+    centersService.updateDetailsOfAnExistingLogisticsCenter(centerId,
+        Map.of("currentLoad", centerCurrentLoad.toString()));
+  }
+
+  private void assignOrder(Order order, String centerName) {
+    order.setAssignedCenter(centerName);
     order.setStatus("ASSIGNED");
     ordersRepository.save(order);
-    centersService.updateDetailsOfAnExistingLogisticsCenter(center.getId(),
-        Map.of("currentLoad", String.valueOf(center.getCurrentLoad() + 1)));
-    return new ProcessedOrder(calculateHaversineDistance(order.getCoordinates(), center.getCoordinates()),
-        order.getId(), center.getName());
   }
 
   private double calculateHaversineDistance(Coordinates start, Coordinates end) {
