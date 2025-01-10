@@ -4,6 +4,8 @@ import com.hackathon.inditex.Entities.Center;
 import com.hackathon.inditex.Entities.Coordinates;
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Repositories.OrdersRepository;
+import com.hackathon.inditex.ValueObjects.NotProcessedOrder;
+import com.hackathon.inditex.ValueObjects.ProcessedOrder;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
@@ -93,32 +95,4 @@ public class OrdersService {
     return EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  public record ProcessedOrder(
-      Double distance,
-      long orderId,
-      String assignedLogisticsCenter,
-      String status
-  ) {
-
-    public ProcessedOrder(Double distance, long orderId, String assignedLogisticsCenter) {
-      this(distance, orderId, assignedLogisticsCenter, "ASSIGNED");
-    }
-  }
-
-  public record NotProcessedOrder(
-      Double distance,
-      long orderId,
-      String assignedLogisticsCenter,
-      String message,
-      String status
-  ) {
-
-    public static NotProcessedOrder byType(long orderId, String status) {
-      return new NotProcessedOrder(null, orderId, null, "No available centers support the order type.", status);
-    }
-
-    public static NotProcessedOrder byCapacity(long orderId, String status) {
-      return new NotProcessedOrder(null, orderId, null, "All centers are at maximum capacity.", status);
-    }
-  }
 }

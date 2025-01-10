@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.hackathon.inditex.Entities.Order;
 import com.hackathon.inditex.Services.OrdersService;
-import com.hackathon.inditex.Services.OrdersService.NotProcessedOrder;
-import com.hackathon.inditex.Services.OrdersService.ProcessedOrder;
+import com.hackathon.inditex.ValueObjects.NotProcessedOrder;
+import com.hackathon.inditex.ValueObjects.ProcessedOrder;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
