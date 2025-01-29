@@ -417,19 +417,3 @@ A2: No, everything needed to complete the challenge is included.
 **Q3: Can I modify docker-compose?**
 
 A3: No, modifying this file may cause the application to malfunction.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
